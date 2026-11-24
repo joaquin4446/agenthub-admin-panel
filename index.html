@@ -91,9 +91,43 @@
       </section>
     </section>
 
+    <section id="users" aria-labelledby="section-title" hidden>
+      <div class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <h2 id="users-table-title" class="px-5 py-4 font-semibold sm:px-6">Usuarios registrados</h2>
+        <div role="region" aria-labelledby="users-table-title" tabindex="0" class="overflow-x-auto rounded-b-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500">
+          <table id="users-table" aria-labelledby="users-table-title" class="w-full whitespace-nowrap text-left text-sm">
+            <thead class="border-y border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300">
+              <tr>
+                <th scope="col" class="px-5 py-3 font-medium sm:px-6">Nombre</th>
+                <th scope="col" class="px-5 py-3 font-medium sm:px-6">Correo electrónico</th>
+                <th scope="col" class="px-5 py-3 font-medium sm:px-6">Plan</th>
+                <th scope="col" class="px-5 py-3 font-medium sm:px-6">Estado</th>
+                <th scope="col" class="px-5 py-3 text-right font-medium sm:px-6">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="users-rows" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+        <p id="users-empty" tabindex="-1" class="border-t border-slate-200 px-6 py-10 text-center text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300" hidden>No quedan usuarios registrados.</p>
+        <p id="users-feedback" role="status" class="sr-only"></p>
+      </div>
+    </section>
+
     <section id="pending-section" aria-labelledby="section-title" hidden>
       <p class="rounded-2xl border border-slate-200 bg-white p-6 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Esta sección estará disponible en una próxima fase.</p>
     </section>
   </main>
+
+  <dialog id="user-dialog" aria-modal="true" aria-labelledby="user-dialog-title" aria-describedby="user-dialog-description" class="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-xl backdrop:bg-slate-950/70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+    <div class="p-5 sm:p-6">
+      <h2 id="user-dialog-title" class="text-xl font-semibold tracking-tight"></h2>
+      <p id="user-dialog-description" class="mt-2 text-sm text-slate-600 dark:text-slate-300"></p>
+      <dl id="user-dialog-details" class="mt-5 gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-950/50 sm:grid-cols-2 [&:not([hidden])]:grid" hidden></dl>
+      <form method="dialog" class="mt-6 flex flex-wrap justify-end gap-3">
+        <button id="user-dialog-dismiss" type="submit" value="dismiss" autofocus class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:border-slate-700 dark:hover:bg-slate-800">Cerrar</button>
+        <button id="user-dialog-confirm" type="submit" value="delete" class="rounded-lg bg-rose-700 px-4 py-2 text-sm font-medium text-white hover:bg-rose-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 dark:bg-rose-700 dark:hover:bg-rose-600" hidden>Eliminar usuario</button>
+      </form>
+    </div>
+  </dialog>
 </body>
 </html>
