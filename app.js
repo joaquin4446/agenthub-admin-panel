@@ -12,6 +12,7 @@ const dashboard = document.querySelector('#dashboard');
 const usersSection = document.querySelector('#users');
 const agentsSection = document.querySelector('#bot');
 const skillsSection = document.querySelector('#skills');
+const contractsSection = document.querySelector('#contracts');
 const pendingSection = document.querySelector('#pending-section');
 const themeToggle = document.querySelector('#theme-toggle');
 
@@ -50,6 +51,7 @@ for (const button of sectionButtons) {
     const showUsers = button.dataset.section === 'users';
     const showAgents = button.dataset.section === 'bot';
     const showSkills = button.dataset.section === 'skills';
+    const showContracts = button.dataset.section === 'contracts';
     closeActions();
     sectionTitle.textContent = title;
     sectionContext.textContent = button.dataset.context;
@@ -58,7 +60,8 @@ for (const button of sectionButtons) {
     usersSection.hidden = !showUsers;
     agentsSection.hidden = !showAgents;
     skillsSection.hidden = !showSkills;
-    pendingSection.hidden = showDashboard || showUsers || showAgents || showSkills;
+    contractsSection.hidden = !showContracts;
+    pendingSection.hidden = showDashboard || showUsers || showAgents || showSkills || showContracts;
 
     if (mobileMenu.open) mobileMenu.close();
     sectionTitle.focus();
@@ -140,12 +143,47 @@ const skills = [
   agentNames: agents.filter(agent => agent.skills.includes(skill.name)).map(agent => agent.name),
 }));
 
+// Contract records keep the names and fees agreed at the time of rental.
+const contracts = [
+  {
+    id: 'C001', client: 'Camila Torres', agent: 'Atlas', start: '2026-11-01', end: '2026-11-30',
+    status: 'Activo', basePrice: 79,
+    skills: [
+      { name: 'Navegación web', price: 20 },
+      { name: 'Lectura de documentos', price: 15 },
+      { name: 'Gestión de calendario', price: 15 },
+    ],
+  },
+  {
+    id: 'C002', client: 'Mateo Ríos', agent: 'Nova', start: '2026-11-05', end: '2026-12-04',
+    status: 'Activo', basePrice: 79,
+    skills: [
+      { name: 'Navegación web', price: 20 },
+      { name: 'Análisis de datos', price: 20 },
+    ],
+  },
+  {
+    id: 'C003', client: 'Andrés Moreno', agent: 'Iris', start: '2026-11-10', end: '2026-12-09',
+    status: 'Activo', basePrice: 79,
+    skills: [
+      { name: 'Lectura de documentos', price: 15 },
+      { name: 'Gestión de calendario', price: 15 },
+    ],
+  },
+  {
+    id: 'C004', client: 'Daniela Vega', agent: 'Echo', start: '2026-10-01', end: '2026-10-31',
+    status: 'Finalizado', basePrice: 74,
+    skills: [{ name: 'Lectura de documentos', price: 15 }],
+  },
+];
+
 const statusColors = {
   Activo: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
   Suspendido: 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300',
   Pendiente: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300',
   Fallando: 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300',
   Inactivo: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  Finalizado: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
 };
 const usersRows = document.querySelector('#users-rows');
 const usersEmpty = document.querySelector('#users-empty');
@@ -156,6 +194,7 @@ const agentsFeedback = document.querySelector('#agents-feedback');
 const skillsList = document.querySelector('#skills-list');
 const skillsEmpty = document.querySelector('#skills-empty');
 const skillsFeedback = document.querySelector('#skills-feedback');
+const contractsRows = document.querySelector('#contracts-rows');
 
 const actionDialog = document.querySelector('#action-dialog');
 const dialogTitle = document.querySelector('#action-dialog-title');
@@ -173,16 +212,17 @@ function statusBadge(status) {
   return `<span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusColors[status]}">${status}</span>`;
 }
 
-function closeActions() {
+function closeActions(trigger) {
   openActions?.hidePopover();
+  trigger?.focus();
 }
 
-function renderActions({ id, name }, action, label) {
+function renderActions({ id, name }, action, label, { canDelete = true } = {}) {
   return `
     <button type="button" aria-label="Acciones de ${name}" aria-expanded="false" aria-controls="actions-${id}" popovertarget="actions-${id}" class="size-10 rounded-lg text-xl leading-none text-slate-600 hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-slate-300 dark:hover:bg-slate-700">⋮</button>
     <div id="actions-${id}" popover="auto" class="inset-auto bottom-4 right-4 m-0 w-44 rounded-xl border border-slate-200 bg-white p-1 text-left text-sm text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 supports-[position-area:bottom]:inset-auto supports-[position-area:bottom]:[position-area:bottom_span-left] supports-[position-area:bottom]:justify-self-end supports-[position-area:bottom]:[position-try-fallbacks:flip-block]">
       <button type="button" data-action="${action}" autofocus class="block w-full rounded-lg px-3 py-2 text-left hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:hover:bg-slate-800">${label}</button>
-      <button type="button" data-action="delete" class="block w-full rounded-lg px-3 py-2 text-left text-rose-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-rose-300 dark:hover:bg-rose-500/15">Eliminar</button>
+      ${canDelete ? '<button type="button" data-action="delete" class="block w-full rounded-lg px-3 py-2 text-left text-rose-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-rose-300 dark:hover:bg-rose-500/15">Eliminar</button>' : ''}
     </div>`;
 }
 
@@ -332,6 +372,56 @@ function showSkillDetails(skill) {
   ]);
 }
 
+function contractTotal({ basePrice, skills }) {
+  return skills.reduce((total, { price }) => total + price, basePrice);
+}
+
+function renderContractDate(date) {
+  return `<time datetime="${date}">${date.split('-').reverse().join('/')}</time>`;
+}
+
+function renderContractRow(contract) {
+  const chips = contract.skills.map(({ name }) => `
+    <li class="w-fit whitespace-nowrap rounded-md bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700 dark:bg-violet-500/15 dark:text-violet-200">${name}</li>`).join('');
+  return `
+    <tr data-contract-id="${contract.id}" class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+      <th scope="row" class="px-4 py-3 font-mono text-xs font-semibold">${contract.id}</th>
+      <td class="whitespace-nowrap px-4 py-3 font-medium">${contract.client}</td>
+      <td class="px-4 py-3">${contract.agent}</td>
+      <td class="px-4 py-3"><ul role="list" class="flex min-w-40 flex-wrap gap-1.5">${chips}</ul></td>
+      <td class="whitespace-nowrap px-4 py-3 tabular-nums text-slate-600 dark:text-slate-300">${renderContractDate(contract.start)}</td>
+      <td class="whitespace-nowrap px-4 py-3 tabular-nums text-slate-600 dark:text-slate-300">${renderContractDate(contract.end)}</td>
+      <td class="px-4 py-3 text-right font-semibold tabular-nums">$${contractTotal(contract)}</td>
+      <td class="px-4 py-3">${statusBadge(contract.status)}</td>
+      <td class="px-4 py-3 text-right">${renderActions({ id: contract.id, name: `contrato ${contract.id}` }, 'detail', 'Ver detalle', { canDelete: false })}</td>
+    </tr>`;
+}
+
+function showContractDetails(contract) {
+  const charges = [{ name: `Alquiler de ${contract.agent}`, price: contract.basePrice }, ...contract.skills];
+  const breakdown = `
+    <dl class="space-y-2">
+      ${charges.map(({ name, price }) => `
+        <div class="flex justify-between gap-3">
+          <dt>${name}</dt>
+          <dd class="shrink-0 tabular-nums">$${price}</dd>
+        </div>`).join('')}
+      <div class="flex justify-between gap-3 border-t border-slate-200 pt-2 font-semibold dark:border-slate-700">
+        <dt>Total</dt>
+        <dd class="tabular-nums">$${contractTotal(contract)}</dd>
+      </div>
+    </dl>`;
+  showDetails(`Contrato ${contract.id}`, 'Detalle del alquiler y sus importes.', [
+    ['ID', contract.id],
+    ['Cliente', contract.client],
+    ['Agente alquilado', contract.agent],
+    ['Fecha de inicio', renderContractDate(contract.start)],
+    ['Fecha de finalización', renderContractDate(contract.end)],
+    ['Estado', statusBadge(contract.status)],
+    ['Desglose (USD)', breakdown],
+  ]);
+}
+
 function removeRecord(record, collection, element, emptyState) {
   const nextElement = element.nextElementSibling || element.previousElementSibling;
   collection.splice(collection.indexOf(record), 1);
@@ -348,6 +438,7 @@ function removeRecord(record, collection, element, emptyState) {
 usersRows.innerHTML = users.map(renderUserRow).join('');
 agentsList.innerHTML = agents.map(renderAgent).join('');
 skillsList.innerHTML = skills.map(renderSkill).join('');
+contractsRows.innerHTML = contracts.map(renderContractRow).join('');
 
 for (const panel of document.querySelectorAll('[popover]')) {
   panel.addEventListener('beforetoggle', (event) => {
@@ -364,8 +455,7 @@ usersRows.addEventListener('click', (event) => {
 
   const row = action.closest('[data-user-id]');
   const user = users.find(({ id }) => id === row.dataset.userId);
-  closeActions();
-  row.querySelector('[popovertarget]').focus();
+  closeActions(row.querySelector('[popovertarget]'));
   if (action.dataset.action === 'detail') {
     showUserDetails(user);
   } else {
@@ -394,8 +484,7 @@ agentsList.addEventListener('click', (event) => {
 
   const card = action.closest('[data-agent-id]');
   const agent = agents.find(({ id }) => id === card.dataset.agentId);
-  closeActions();
-  card.querySelector('[popovertarget]').focus();
+  closeActions(card.querySelector('[popovertarget]'));
   if (action.dataset.action === 'configure') {
     configureAgent(agent);
   } else {
@@ -412,8 +501,7 @@ skillsList.addEventListener('click', (event) => {
 
   const card = action.closest('[data-skill-id]');
   const skill = skills.find(({ id }) => id === card.dataset.skillId);
-  closeActions();
-  card.querySelector('[popovertarget]').focus();
+  closeActions(card.querySelector('[popovertarget]'));
   if (action.dataset.action === 'detail') {
     showSkillDetails(skill);
   } else {
@@ -422,6 +510,16 @@ skillsList.addEventListener('click', (event) => {
       skillsFeedback.textContent = `Se eliminó ${skill.name} del catálogo de esta sesión.`;
     });
   }
+});
+
+contractsRows.addEventListener('click', (event) => {
+  const action = event.target.closest('[data-action="detail"]');
+  if (!action) return;
+
+  const row = action.closest('[data-contract-id]');
+  const contract = contracts.find(({ id }) => id === row.dataset.contractId);
+  closeActions(row.querySelector('[popovertarget]'));
+  showContractDetails(contract);
 });
 
 actionDialog.addEventListener('click', (event) => {
