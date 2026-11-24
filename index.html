@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard | AgentHub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: "class" };</script>
+  <script src="app.js" defer></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 md:pl-64">
+  <aside id="desktop-sidebar" class="fixed inset-y-0 left-0 hidden w-64 overflow-y-auto border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 md:block">
+    <div id="sidebar-content" class="p-4">
+      <div class="mb-9 flex items-center gap-3 px-2 pt-3">
+        <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-indigo-600 text-white"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5Z M3 7l9 5 9-5 M12 12v10 M7.5 4.5l9 5"/></svg></span>
+        <span class="text-xl font-semibold tracking-tight">AgentHub</span>
+      </div>
+      <nav aria-label="Secciones del panel">
+        <ul class="space-y-1">
+          <li><button type="button" data-section="dashboard" data-context="Datos ilustrativos del mes actual" aria-current="page" class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 aria-[current=page]:bg-indigo-50 aria-[current=page]:text-indigo-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:aria-[current=page]:bg-violet-500/15 dark:aria-[current=page]:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z"/></svg><span>Dashboard</span></button></li>
+          <li><button type="button" data-section="users" data-context="Cuentas y planes de clientes" class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 aria-[current=page]:bg-indigo-50 aria-[current=page]:text-indigo-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:aria-[current=page]:bg-violet-500/15 dark:aria-[current=page]:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M22 21v-2a4 4 0 0 0-3-4 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M16 3a4 4 0 0 1 0 8"/></svg><span>Gestión de usuarios</span></button></li>
+          <li><button type="button" data-section="bot" data-context="Inventario y estado de los agentes" class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 aria-[current=page]:bg-indigo-50 aria-[current=page]:text-indigo-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:aria-[current=page]:bg-violet-500/15 dark:aria-[current=page]:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8 M4 8h16v12H4z M1 13h3 M20 13h3 M9 13h.01 M15 13h.01"/></svg><span>Gestión de agentes</span></button></li>
+          <li><button type="button" data-section="skills" data-context="Capacidades adicionales de los agentes" class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 aria-[current=page]:bg-indigo-50 aria-[current=page]:text-indigo-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:aria-[current=page]:bg-violet-500/15 dark:aria-[current=page]:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 13h7l-1 9 10-12h-7l1-8z"/></svg><span>Skills</span></button></li>
+          <li><button type="button" data-section="contracts" data-context="Contratos de alquiler y sus importes" class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 aria-[current=page]:bg-indigo-50 aria-[current=page]:text-indigo-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:aria-[current=page]:bg-violet-500/15 dark:aria-[current=page]:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7"/></svg><span>Contrataciones de agentes</span></button></li>
+          <li><button type="button" data-section="error" data-context="Incidentes operativos de los agentes" class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 aria-[current=page]:bg-indigo-50 aria-[current=page]:text-indigo-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:aria-[current=page]:bg-violet-500/15 dark:aria-[current=page]:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z M12 9v4 M12 16h.01"/></svg><span>Log de errores</span></button></li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <dialog id="mobile-menu" aria-label="Menú de navegación" class="fixed inset-y-0 left-0 right-auto m-0 h-dvh max-h-none w-72 max-w-[85vw] overflow-y-auto border-r border-slate-200 bg-white text-slate-900 backdrop:bg-slate-950/70 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 md:hidden">
+    <div class="flex justify-end px-4 pt-3">
+      <button id="close-menu" type="button" autofocus aria-label="Cerrar menú" class="grid size-10 place-items-center rounded-lg hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:hover:bg-slate-800"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="m6 6 12 12 M18 6 6 18"/></svg></button>
+    </div>
+  </dialog>
+
+  <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div class="mx-auto flex max-w-7xl items-start gap-3 px-4 py-5 sm:items-center sm:gap-4 sm:px-8 lg:px-10">
+      <button id="open-menu" type="button" aria-label="Abrir menú" aria-haspopup="dialog" aria-expanded="false" aria-controls="mobile-menu" class="grid size-10 shrink-0 place-items-center rounded-lg border border-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:border-slate-700 md:hidden"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18 M3 12h18 M3 18h18"/></svg></button>
+      <div class="min-w-0 flex-1">
+        <h1 id="section-title" tabindex="-1" class="text-xl font-semibold tracking-tight sm:text-2xl">Dashboard</h1>
+        <p id="section-context" class="mt-1 text-sm text-slate-600 dark:text-slate-400">Datos ilustrativos del mes actual</p>
+      </div>
+      <div class="flex shrink-0 items-center gap-3">
+        <span class="hidden rounded-full border border-slate-200 px-3 py-1 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300 sm:inline">Administrador</span>
+        <button id="theme-toggle" type="button" aria-label="Modo oscuro" aria-pressed="true" title="Modo claro/oscuro" class="grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:border-slate-700 dark:text-violet-200 dark:hover:bg-slate-800">
+          <svg aria-hidden="true" class="size-5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M20.9 13.3A9 9 0 0 1 10.7 3.1 9 9 0 1 0 20.9 13.3Z"/></svg>
+          <svg aria-hidden="true" class="hidden size-5 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2 M12 20v2 M2 12h2 M20 12h2 M5 5l2 2 M17 17l2 2 M19 5l-2 2 M7 17l-2 2 M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-7 sm:px-8 sm:py-9 lg:px-10">
+    <section id="dashboard" aria-labelledby="section-title">
+      <dl class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5">
+          <div class="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div class="grid size-11 shrink-0 place-items-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20 M17 6H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H6"/></svg></div>
+            <div class="min-w-0">
+              <dt class="text-sm font-medium text-slate-600 dark:text-slate-300">Ingresos totales (este mes)</dt>
+              <dd class="mt-2 text-3xl font-semibold tracking-tight tabular-nums">$357</dd>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div class="grid size-11 shrink-0 place-items-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h8l10 10-8 8L3 11z M7.5 7.5h.01"/></svg></div>
+            <div class="min-w-0">
+              <dt class="text-sm font-medium text-slate-600 dark:text-slate-300">Pérdidas por descuentos y cupones</dt>
+              <dd class="mt-2 text-3xl font-semibold tracking-tight tabular-nums">$18</dd>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div class="grid size-11 shrink-0 place-items-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5l3-7 4 14 3-7h5"/></svg></div>
+            <div class="min-w-0">
+              <dt class="text-sm font-medium text-slate-600 dark:text-slate-300">Agentes activos</dt>
+              <dd class="mt-2 text-3xl font-semibold tracking-tight tabular-nums">2</dd>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div class="grid size-11 shrink-0 place-items-center rounded-xl bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"><svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z M12 9v4 M12 16h.01"/></svg></div>
+            <div class="min-w-0">
+              <dt class="text-sm font-medium text-slate-600 dark:text-slate-300">Agentes fallando</dt>
+              <dd class="mt-2 text-3xl font-semibold tracking-tight tabular-nums">1</dd>
+            </div>
+          </div>
+      </dl>
+
+      <section aria-labelledby="chart-title" class="mt-6 flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/50 px-5 py-10 text-center dark:border-slate-700 dark:bg-slate-900/50">
+        <div class="mb-4 grid size-12 place-items-center rounded-xl bg-slate-100 text-indigo-700 dark:bg-slate-800 dark:text-violet-300"><svg aria-hidden="true" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18 M8 16v-3 M13 16V9 M18 16V6"/></svg></div>
+        <h2 id="chart-title" class="font-semibold">Gráfico de actividad semanal</h2>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Marcador de posición · sin conexión a datos</p>
+      </section>
+    </section>
+
+    <section id="pending-section" aria-labelledby="section-title" hidden>
+      <p class="rounded-2xl border border-slate-200 bg-white p-6 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Esta sección estará disponible en una próxima fase.</p>
+    </section>
+  </main>
+</body>
+</html>
