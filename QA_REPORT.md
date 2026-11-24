@@ -1,0 +1,63 @@
+# AgentHub — Informe de Validación y Control de Calidad
+
+Auditoría del 24/11/2026 sobre el árbol de trabajo basado en el commit `f462767`. Se revisaron `SPECS.md`, `index.html`, `app.js` y el historial Git. Pasaron `node --check app.js`, `git diff --check` y la suite de auditoría disponible en `/tmp/agenthub-audit.cjs`. La suite ejecutó el JavaScript con un DOM simulado. El resultado **CUMPLE** significa que la inspección del código, del historial o la prueba simulada aportó evidencia suficiente para el criterio. La auditoría no incluyó comprobaciones visuales en un navegador.
+
+**Resultado global** — 21 CUMPLE · 1 NO CUMPLE · 6 REQUIERE PRUEBA MANUAL.
+
+## Criterios de aceptación
+
+| N.º | Criterio original de `SPECS.md` | Resultado | Evidencia |
+| ---: | --- | --- | --- |
+| 1 | `SPECS.md` existe en la raíz y se encuentra en un **commit específico anterior al primer commit de implementación HTML propia**; el historial Git lo demuestra. | CUMPLE | El commit exclusivo `b31d6cb` añadió `SPECS.md` antes de `115cdc5`, que incorporó el HTML propio. El HTML anterior pertenecía a la plantilla. |
+| 2 | Este documento contiene seis secciones, con **mínimo tres especificaciones concretas por sección**, inventario de componentes y criterios numerados. | CUMPLE | Las secciones 4.1–4.6 tienen entre cuatro y seis especificaciones cada una. Las secciones 6 y 8 contienen 14 componentes y 28 criterios numerados, respectivamente. |
+| 3 | El prototipo abre `index.html` y muestra las seis secciones sin necesitar API, backend ni instalación de paquetes. | CUMPLE | `index.html` carga el Play CDN y el script local `app.js`. La suite inicializó las seis vistas con datos locales. Los estilos requieren acceso al CDN. |
+| 4 | Las seis entradas de la barra lateral funcionan y muestran un indicador de sección activa. | CUMPLE | La suite ejecutó 18 cambios de vista y comprobó que solo queda visible la sección elegida y que el botón activo recibe `aria-current="page"`. |
+| 5 | Sidebar desktop persistente; en móvil es accesible desde control y puede cerrarse. | REQUIERE PRUEBA MANUAL | El HTML define un sidebar fijo desde 768 px y un diálogo para el menú móvil. La suite simuló apertura y cierre por selección y backdrop. Falta comprobar la disposición y los controles en un navegador. |
+| 6 | Dashboard muestra exactamente cuatro tarjetas: ingresos, descuentos, activos y fallando, con iconos, etiquetas y valores. | CUMPLE | El HTML contiene cuatro tarjetas con icono y etiqueta. La suite comprobó los valores $357, $18, 2 y 1, y la declaración de dos columnas desde el punto de quiebre mediano. |
+| 7 | Dashboard muestra debajo un marcador de gráfico semanal de ancho completo, borde discontinuo y etiqueta centrada. | CUMPLE | El HTML coloca bajo las tarjetas una sección de ancho disponible en el flujo, con `border-dashed`, `text-center` y el título «Gráfico de actividad semanal». |
+| 8 | Usuarios muestra **al menos cinco filas** con nombre, email, plan y badge de estado. | CUMPLE | La suite obtuvo cinco filas iniciales y la plantilla de fila incluye nombre, correo, plan y badge de estado. |
+| 9 | Todas las filas de usuarios tienen menú `⋮`, con «Ver detalle» y «Eliminar». | CUMPLE | `renderUserRow` llama a `renderActions` en cada fila con «Ver detalle» y la acción secundaria predeterminada «Eliminar». |
+| 10 | «Ver detalle» de usuario abre un modal con registro completo. | CUMPLE | La suite abrió los cinco detalles de usuario. `showUserDetails` incluye ID, nombre, email, empresa, plan, estado, fecha de registro y agentes asignados. |
+| 11 | Agentes muestra **al menos cuatro registros**, con propietario, estado y skills colapsadas inicialmente. | CUMPLE | La suite obtuvo cuatro agentes y verificó propietario, estado y cuatro paneles inicialmente inertes y contraídos. |
+| 12 | Pulsar «Ver skills» expande/contrae con transición suave y actualiza `aria-expanded`. | REQUIERE PRUEBA MANUAL | La suite verificó ambos valores de `aria-expanded` y el cambio de `inert`. El HTML generado declara una transición de filas y opacidad de 300 ms con `motion-safe`. Falta comprobar la animación en pantalla. |
+| 13 | Cada agente dispone de «Configurar» y «Eliminar»; «Configurar» abre un modal con prompt editable en `<textarea>`. | CUMPLE | Las tarjetas generan «Configurar» y «Eliminar». La suite abrió las cuatro configuraciones y recuperó el prompt modificado al reabrir; el campo es un `<textarea>`. |
+| 14 | Skills contiene explicación de qué es una skill y **al menos cuatro tarjetas** con nombre, descripción, contador y menú `⋮`. | CUMPLE | `index.html` incluye el texto explicativo. La suite obtuvo cuatro tarjetas y contadores 2, 3, 2 y 1; la plantilla incluye nombre, descripción y menú. |
+| 15 | «Ver detalle» de skill abre modal con información ampliada. | CUMPLE | La suite abrió los cuatro detalles y comprobó categorías, ejemplos y agentes asociados. `showSkillDetails` también incluye la descripción ampliada y el contador. |
+| 16 | Contrataciones muestra **al menos cuatro contratos** con cliente, agente, skills, fechas e importe total. | CUMPLE | La suite obtuvo cuatro filas. `renderContractRow` muestra cliente, agente, skills, fechas de inicio y finalización y total en USD. |
+| 17 | «Ver detalle» de contrato abre modal con precio base y cada skill contratada con su precio individual; la suma coincide con el total mostrado. | CUMPLE | La suite verificó los precios individuales en los cuatro detalles y los totales $129, $119, $109 y $89. Tabla y modal usan `contractTotal`, que suma base y skills. |
+| 18 | Log de errores muestra **al menos seis entradas** con fecha/hora, agente, tipo, descripción y badge de gravedad. | CUMPLE | La suite obtuvo seis registros. `renderIncidentRow` incluye fecha y hora, agente, tipo, descripción breve y badge de gravedad. |
+| 19 | «Ver detalle» de error abre modal con traza ficticia; «Marcar como resuelto» modifica el estado visual local. | CUMPLE | La suite verificó las seis trazas ficticias y simuló resolver E001. Comprobó el badge «Resuelto», la acción deshabilitada y la conservación del estado durante la navegación. |
+| 20 | Los menús de acciones de **todas las tablas/listas** se cierran al hacer clic fuera. | REQUIERE PRUEBA MANUAL | Los 23 menús comparten `popover="auto"`. La suite ejercitó el seguimiento de estado y el cierre al navegar. El clic exterior depende del comportamiento nativo del navegador. |
+| 21 | Los modales se pueden cerrar con botón y clic en backdrop; adicionalmente con `Escape`. | REQUIERE PRUEBA MANUAL | La suite simuló los cierres por botón y backdrop y comprobó la restauración del foco en su modelo. Falta confirmar estos gestos y el cierre nativo con Escape en un navegador. |
+| 22 | «Ver detalle» abre un modal en **al menos cuatro secciones** (usuarios, skills, contratos y errores; configurar agentes también usa modal). | CUMPLE | La suite abrió 19 detalles en usuarios, skills, contratos e incidentes, además de cuatro configuraciones de agentes. |
+| 23 | El modo oscuro/claro cambia toda la interfaz con clases `dark:` y conserva la elección al cambiar entre secciones. | REQUIERE PRUEBA MANUAL | La suite verificó el cambio de la clase raíz `dark`, `aria-pressed` y la restauración de la preferencia al reinicializar. El código declara variantes `dark:`. Falta recorrer todas las vistas y estados en ambos temas en un navegador. |
+| 24 | Todos los estilos usan utilidades Tailwind desde CDN; no existen atributos `style`, bloques `<style>` personalizados, archivos CSS externos propios ni frameworks JS. | CUMPLE | `index.html` referencia el Play CDN de Tailwind y `app.js`. La inspección no encontró CSS propio, atributos `style`, bloques `<style>` personalizados ni dependencias de frameworks JS. |
+| 25 | La maquetación es legible en desktop y móvil, con tablas desplazables internamente y sin overflow horizontal global. | REQUIERE PRUEBA MANUAL | Las tablas tienen contenedores `overflow-x-auto` y el HTML usa clases responsive. Falta verificar legibilidad y medir el desbordamiento de página en pantallas reales o emuladas. |
+| 26 | El HTML usa `header`, `nav`, `main`, `section`, `table`, `button` y otros elementos semánticos apropiados. | CUMPLE | El HTML contiene `header`, `nav`, `main`, `section`, `table`, `thead` y `button`. El código usa también `article`, `dialog`, listas y `time`. |
+| 27 | Los datos de agentes, skills, contratos e incidentes son coherentes entre secciones y claramente de demostración. | CUMPLE | Los contratos e incidentes usan agentes del inventario de ejemplo. Las skills de los contratos usan los nombres del catálogo; los contadores iniciales coinciden con los agentes. Los contratos activos suman $357 y el inventario incluye dos agentes activos y uno fallando. |
+| 28 | El repositorio público de entrega contiene `SPECS.md`, `index.html` y recursos necesarios; los cambios están commiteados y publicados en GitHub. | NO CUMPLE | La referencia local `origin/main` apunta a `f462767`. Las correcciones de `app.js` y `README.md` siguen sin commit. La consulta de la URL de GitHub no pudo verificar el acceso público. |
+
+## Errores detectados y correcciones realizadas
+
+Las correcciones ya presentes en el árbol de trabajo se conservaron. El diff respecto a `f462767` documenta estos cambios.
+
+- **Cierre accidental del menú móvil.** El manejador anterior podía cerrar el menú al pulsar un área vacía dentro del panel. El cierre por backdrop ahora comprueba las coordenadas, el inicio del gesto y su cancelación. La misma comprobación se aplica al diálogo de acciones. La suite simuló clics internos, clics externos y gestos cancelados.
+- **Foco al cerrar el menú móvil.** Se enfoca explícitamente el botón de apertura antes de mostrar el diálogo. La suite comprobó que el foco vuelve al botón al cerrar desde el backdrop y que pasa al título al seleccionar una sección.
+- **Preferencia de tema al recargar.** Se añadió lectura y escritura en `localStorage` con una alternativa en memoria si el almacenamiento está bloqueado. La suite comprobó ambos casos. La persistencia tras recargar es opcional según la especificación.
+- **Instrucciones de la plantilla.** Se actualizó `README.md` con la apertura directa de `index.html`, el requisito de acceso al CDN y el alcance de los cambios simulados.
+- **Entrega pendiente.** El criterio 28 queda abierto porque el estado auditado incluye cambios locales sin commit y no se pudo confirmar el acceso público a GitHub.
+
+## Pruebas manuales pendientes
+
+1. **Sidebar (5).** Abrir `index.html` directamente en un navegador con acceso al CDN y recorrer las seis vistas. Confirmar que en escritorio el sidebar permanece accesible. En móvil, abrirlo con el botón y comprobar el cierre con su botón, el backdrop y la selección de una sección.
+2. **Skills de agentes (12).** Expandir y contraer las listas varias veces. Confirmar que la transición es suave, que se leen todas las skills abiertas y que `aria-expanded` cambia en cada pulsación. Repetir con la preferencia de movimiento reducido.
+3. **Menús de acciones (20).** Abrir un menú de cada una de las cinco vistas con acciones y cerrarlo pulsando fuera. Repetir con Escape y al abrir otro menú. En las tablas, comprobar que el menú queda visible cerca de los bordes de su contenedor.
+4. **Modales (21).** Probar el botón de cierre, el backdrop y Escape en los detalles, la configuración y las confirmaciones de eliminación. Confirmar que pulsar dentro del diálogo no lo cierra, que el fondo no recibe clics y que el foco vuelve al control de origen cuando existe.
+5. **Tema (23).** Recorrer las seis vistas en claro y oscuro, con menús y modales abiertos. Revisar texto, badges, bordes, fondos y foco visible. Confirmar que se conserva la elección al navegar y, si el navegador permite almacenamiento local, al recargar.
+6. **Maquetación (25).** Revisar las seis vistas a 320, 375, 768 y 1280 px. Confirmar que la página no se desplaza horizontalmente y que las tres tablas pueden desplazarse dentro de sus contenedores sin perder acceso a las acciones.
+
+Para cerrar el criterio 28 queda pendiente publicar el estado final y comprobar desde una sesión de GitHub sin autenticar que el repositorio es público y contiene `SPECS.md`, `index.html` y `app.js`.
+
+## Conclusión
+
+La evidencia confirma que el prototipo implementa las seis vistas y sus flujos de demostración, con datos y totales iniciales coherentes. La suite también verificó que las ediciones, eliminaciones y resoluciones se simulan localmente y se restablecen al reinicializar. La validación académica queda pendiente de seis comprobaciones en navegador y de la publicación verificable de la versión corregida. Esta documentación se añadió sin modificar `SPECS.md` ni realizar commits o pushes.

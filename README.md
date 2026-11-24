@@ -1,38 +1,14 @@
-# HTML Hello
+# AgentHub — Panel de Administración
 
-The most basic boilerplate for any 4Geeks Academy student, start your very first website from scratch.
+Prototipo académico de 4Geeks Academy con seis vistas y datos ficticios.
 
-> There is a video tutorial on [how to use this template to create your very first website here](https://youtu.be/dfbDCMu_p-0).
+## Abrir el panel
 
-## What to do next?
+Abre `index.html` en un navegador actualizado. El panel usa HTML5, JavaScript vanilla y Tailwind CSS v3 mediante Play CDN. La carga de estilos requiere acceso al CDN. El panel funciona sin servidor ni instalación de paquetes.
 
-Create an `index.html` file with the [basic HTML structure](http://4geeks.com/lesson/what-is-html-learn-html#page-structure) and see it live by running a web-server using the following command:
+Usa el menú lateral para cambiar de sección y el botón de tema para alternar entre claro y oscuro. Las ediciones, eliminaciones y resoluciones se conservan durante la sesión. Al recargar se recuperan los datos originales y se conserva el tema si el navegador permite el almacenamiento local.
 
-```bash
-$ pip3 install flask && python3 server.py
-```
-
-- You can create as many HTML files as you want.
-- You can also create CSS files and import them into your website using a `<link>` tag placed between the `<head></head>` tags, like this:
-
-```html
-<head>
-  ...
-  <link rel="stylesheet" type="text/css" href="styles.css">
-  ...
-</head>
-```
-
-- If you want to use Tailwind CSS, add it optionally via the official Tailwind CSS v4 CDN inside the same `<head>`:
-
-```html
-<head>
-  ...
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link rel="stylesheet" type="text/css" href="styles.css">
-  ...
-</head>
-```
+Consulta [SPECS.md](SPECS.md) para conocer el alcance y los criterios de aceptación.
 
 ### Contributors
 

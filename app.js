@@ -15,8 +15,10 @@ const skillsSection = document.querySelector('#skills');
 const contractsSection = document.querySelector('#contracts');
 const incidentsSection = document.querySelector('#error');
 const themeToggle = document.querySelector('#theme-toggle');
+const themeStorageKey = 'agenthub-theme';
 
 openMenu.addEventListener('click', () => {
+  openMenu.focus();
   mobileMenu.append(sidebarContent);
   mobileMenu.showModal();
   openMenu.setAttribute('aria-expanded', 'true');
@@ -24,9 +26,7 @@ openMenu.addEventListener('click', () => {
 
 closeMenu.addEventListener('click', () => mobileMenu.close());
 
-mobileMenu.addEventListener('click', (event) => {
-  if (event.target === mobileMenu) mobileMenu.close();
-});
+enableBackdropDismissal(mobileMenu);
 
 mobileMenu.addEventListener('close', () => {
   if (mobileMenu.open) return;
@@ -68,9 +68,26 @@ for (const button of sectionButtons) {
   });
 }
 
-themeToggle.addEventListener('click', () => {
-  const darkMode = document.documentElement.classList.toggle('dark');
+function applyTheme(darkMode) {
+  document.documentElement.classList.toggle('dark', darkMode);
   themeToggle.setAttribute('aria-pressed', String(darkMode));
+}
+
+try {
+  const savedTheme = localStorage.getItem(themeStorageKey);
+  if (savedTheme === 'light' || savedTheme === 'dark') applyTheme(savedTheme === 'dark');
+} catch {
+  // The default theme remains usable when storage is unavailable.
+}
+
+themeToggle.addEventListener('click', () => {
+  const darkMode = !document.documentElement.classList.contains('dark');
+  applyTheme(darkMode);
+  try {
+    localStorage.setItem(themeStorageKey, darkMode ? 'dark' : 'light');
+  } catch {
+    // Keep the selected theme for the current page.
+  }
 });
 
 const users = [
@@ -634,14 +651,28 @@ incidentsRows.addEventListener('click', (event) => {
   }
 });
 
-actionDialog.addEventListener('click', (event) => {
-  if (event.target !== actionDialog) return;
-  const bounds = actionDialog.getBoundingClientRect();
-  if (event.clientX < bounds.left || event.clientX >= bounds.right ||
-      event.clientY < bounds.top || event.clientY >= bounds.bottom) {
-    actionDialog.close();
+function enableBackdropDismissal(dialog) {
+  function isBackdrop(event) {
+    if (event.target !== dialog) return false;
+    const { left, right, top, bottom } = dialog.getBoundingClientRect();
+    return event.clientX < left || event.clientX >= right ||
+      event.clientY < top || event.clientY >= bottom;
   }
-});
+
+  let startedOnBackdrop = false;
+  dialog.addEventListener('pointerdown', (event) => {
+    startedOnBackdrop = isBackdrop(event);
+  });
+  dialog.addEventListener('pointercancel', () => {
+    startedOnBackdrop = false;
+  });
+  dialog.addEventListener('click', (event) => {
+    if (startedOnBackdrop && isBackdrop(event)) dialog.close();
+    startedOnBackdrop = false;
+  });
+}
+
+enableBackdropDismissal(actionDialog);
 
 actionDialog.querySelector('form').addEventListener('submit', (event) => {
   if (event.submitter !== dialogConfirm || !actionDialog.open || !confirmAction) return;
