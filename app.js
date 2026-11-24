@@ -13,7 +13,7 @@ const usersSection = document.querySelector('#users');
 const agentsSection = document.querySelector('#bot');
 const skillsSection = document.querySelector('#skills');
 const contractsSection = document.querySelector('#contracts');
-const pendingSection = document.querySelector('#pending-section');
+const incidentsSection = document.querySelector('#error');
 const themeToggle = document.querySelector('#theme-toggle');
 
 openMenu.addEventListener('click', () => {
@@ -61,7 +61,7 @@ for (const button of sectionButtons) {
     agentsSection.hidden = !showAgents;
     skillsSection.hidden = !showSkills;
     contractsSection.hidden = !showContracts;
-    pendingSection.hidden = showDashboard || showUsers || showAgents || showSkills || showContracts;
+    incidentsSection.hidden = button.dataset.section !== 'error';
 
     if (mobileMenu.open) mobileMenu.close();
     sectionTitle.focus();
@@ -177,6 +177,45 @@ const contracts = [
   },
 ];
 
+const incidents = [
+  {
+    id: 'E001', timestamp: '2026-11-23T10:24', agent: 'Nova', type: 'API_TIMEOUT', severity: 'Crítico', resolved: false,
+    summary: 'Tiempo de espera agotado al consultar un servicio externo.',
+    description: 'La consulta de fuentes superó el límite de espera de 15 segundos. El análisis se detuvo antes de recibir los resultados.',
+    stackTrace: 'TimeoutError: source lookup exceeded 15000 ms\n    at fetchSources (demo/connectors/source-client.js:48:11)\n    at runResearch (demo/jobs/research.js:31:7)',
+  },
+  {
+    id: 'E002', timestamp: '2026-11-23T09:12', agent: 'Nova', type: 'RATE_LIMIT', severity: 'Advertencia', resolved: false,
+    summary: 'Se alcanzó un límite de solicitudes.',
+    description: 'Una consulta de investigación recibió una respuesta 429 al alcanzar el límite de solicitudes. La tarea quedó a la espera del siguiente intento.',
+    stackTrace: 'RateLimitError: request quota reached (429)\n    at enforceQuota (demo/http/quota.js:22:9)\n    at queueResearch (demo/jobs/research-queue.js:64:5)',
+  },
+  {
+    id: 'E003', timestamp: '2026-11-22T16:38', agent: 'Atlas', type: 'BROWSER_NAVIGATION', severity: 'Advertencia', resolved: false,
+    summary: 'No fue posible completar la navegación.',
+    description: 'El navegador de demostración detectó un bucle de redirecciones. La extracción de contenido se interrumpió al alcanzar cinco saltos.',
+    stackTrace: 'NavigationError: redirect limit exceeded\n    at followRedirects (demo/browser/navigation.js:73:13)\n    at collectPage (demo/skills/web.js:29:7)',
+  },
+  {
+    id: 'E004', timestamp: '2026-11-22T11:05', agent: 'Iris', type: 'CALENDAR_PERMISSION', severity: 'Crítico', resolved: false,
+    summary: 'Acceso denegado al calendario solicitado.',
+    description: 'El calendario de demostración rechazó la consulta de disponibilidad por falta de permisos de lectura. No se cambió ninguna cita.',
+    stackTrace: 'PermissionError: calendar read access denied\n    at checkReadAccess (demo/calendar/permissions.js:18:9)\n    at listAvailability (demo/skills/calendar.js:41:7)',
+  },
+  {
+    id: 'E005', timestamp: '2026-11-21T14:17', agent: 'Echo', type: 'DOCUMENT_PARSE', severity: 'Advertencia', resolved: true,
+    summary: 'El formato de documento no pudo procesarse.',
+    description: 'El archivo de prueba tenía una cabecera incompatible con su extensión. La extracción se completó después de sustituirlo por una copia válida.',
+    stackTrace: 'DocumentParseError: unsupported file signature\n    at detectFormat (demo/documents/format.js:36:11)\n    at extractText (demo/skills/documents.js:57:7)',
+  },
+  {
+    id: 'E006', timestamp: '2026-11-21T08:40', agent: 'Nova', type: 'RETRY_COMPLETED', severity: 'Informativo', resolved: true,
+    summary: 'Una operación se completó después de reintentos.',
+    description: 'La normalización de una tabla de prueba se completó en el tercer intento tras dos fallos transitorios.',
+    stackTrace: 'RetryCompleted: attempt 3 succeeded\n    at recordRecovery (demo/jobs/retry.js:52:9)\n    at normalizeTable (demo/skills/analytics.js:44:7)',
+  },
+];
+
 const statusColors = {
   Activo: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
   Suspendido: 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300',
@@ -184,6 +223,10 @@ const statusColors = {
   Fallando: 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300',
   Inactivo: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
   Finalizado: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  Crítico: 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300',
+  Advertencia: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300',
+  Informativo: 'bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300',
+  Resuelto: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
 };
 const usersRows = document.querySelector('#users-rows');
 const usersEmpty = document.querySelector('#users-empty');
@@ -195,6 +238,8 @@ const skillsList = document.querySelector('#skills-list');
 const skillsEmpty = document.querySelector('#skills-empty');
 const skillsFeedback = document.querySelector('#skills-feedback');
 const contractsRows = document.querySelector('#contracts-rows');
+const incidentsRows = document.querySelector('#incidents-rows');
+const incidentsFeedback = document.querySelector('#incidents-feedback');
 
 const actionDialog = document.querySelector('#action-dialog');
 const dialogTitle = document.querySelector('#action-dialog-title');
@@ -217,12 +262,14 @@ function closeActions(trigger) {
   trigger?.focus();
 }
 
-function renderActions({ id, name }, action, label, { canDelete = true } = {}) {
+function renderActions({ id, name }, action, label, { canDelete = true, secondaryAction } = {}) {
   return `
     <button type="button" aria-label="Acciones de ${name}" aria-expanded="false" aria-controls="actions-${id}" popovertarget="actions-${id}" class="size-10 rounded-lg text-xl leading-none text-slate-600 hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-slate-300 dark:hover:bg-slate-700">⋮</button>
     <div id="actions-${id}" popover="auto" class="inset-auto bottom-4 right-4 m-0 w-44 rounded-xl border border-slate-200 bg-white p-1 text-left text-sm text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 supports-[position-area:bottom]:inset-auto supports-[position-area:bottom]:[position-area:bottom_span-left] supports-[position-area:bottom]:justify-self-end supports-[position-area:bottom]:[position-try-fallbacks:flip-block]">
       <button type="button" data-action="${action}" autofocus class="block w-full rounded-lg px-3 py-2 text-left hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:hover:bg-slate-800">${label}</button>
       ${canDelete ? '<button type="button" data-action="delete" class="block w-full rounded-lg px-3 py-2 text-left text-rose-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-rose-300 dark:hover:bg-rose-500/15">Eliminar</button>' : ''}
+      ${secondaryAction ? `
+        <button type="button" data-action="${secondaryAction.action}" ${secondaryAction.disabled ? 'disabled' : ''} class="block w-full rounded-lg px-3 py-2 text-left hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 disabled:opacity-60 disabled:hover:bg-transparent dark:hover:bg-slate-800 dark:disabled:hover:bg-transparent">${secondaryAction.label}</button>` : ''}
     </div>`;
 }
 
@@ -265,7 +312,7 @@ function renderUserRow(user) {
 
 function showDetails(title, description, fields) {
   dialogDetails.innerHTML = fields.map(([label, value]) => `
-    <div class="sm:last:odd:col-span-2">
+    <div class="min-w-0 sm:last:odd:col-span-2">
       <dt class="text-xs font-medium text-slate-600 dark:text-slate-400">${label}</dt>
       <dd class="mt-1 break-words font-medium">${value}</dd>
     </div>`).join('');
@@ -376,8 +423,12 @@ function contractTotal({ basePrice, skills }) {
   return skills.reduce((total, { price }) => total + price, basePrice);
 }
 
+function formatDate(date) {
+  return date.split('-').reverse().join('/');
+}
+
 function renderContractDate(date) {
-  return `<time datetime="${date}">${date.split('-').reverse().join('/')}</time>`;
+  return `<time datetime="${date}">${formatDate(date)}</time>`;
 }
 
 function renderContractRow(contract) {
@@ -422,6 +473,48 @@ function showContractDetails(contract) {
   ]);
 }
 
+function escapeHtmlText(text) {
+  return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+
+function renderIncidentTimestamp(timestamp) {
+  const [date, time] = timestamp.split('T');
+  return `<time datetime="${timestamp}">${formatDate(date)} ${time}</time>`;
+}
+
+function resolutionBadge(incident) {
+  return statusBadge(incident.resolved ? 'Resuelto' : 'Pendiente');
+}
+
+function renderIncidentRow(incident) {
+  const actions = renderActions({ id: incident.id, name: `incidente ${incident.id}` }, 'detail', 'Ver detalle', {
+    canDelete: false,
+    secondaryAction: { action: 'resolve', label: incident.resolved ? 'Ya resuelto' : 'Marcar como resuelto', disabled: incident.resolved },
+  });
+  return `
+    <tr data-incident-id="${incident.id}" class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+      <td class="whitespace-nowrap px-4 py-3 tabular-nums text-slate-600 dark:text-slate-300">${renderIncidentTimestamp(incident.timestamp)}</td>
+      <td class="px-4 py-3 font-medium">${incident.agent}</td>
+      <th scope="row" class="px-4 py-3 font-mono text-xs font-semibold">${incident.type}</th>
+      <td class="px-4 py-3">${statusBadge(incident.severity)}</td>
+      <td class="min-w-56 px-4 py-3 text-slate-600 dark:text-slate-300">${escapeHtmlText(incident.summary)}</td>
+      <td data-resolution class="px-4 py-3">${resolutionBadge(incident)}</td>
+      <td class="px-4 py-3 text-right">${actions}</td>
+    </tr>`;
+}
+
+function showIncidentDetails(incident) {
+  showDetails(`Incidente ${incident.id}`, incident.description, [
+    ['ID', incident.id],
+    ['Fecha y hora', renderIncidentTimestamp(incident.timestamp)],
+    ['Agente afectado', incident.agent],
+    ['Tipo de error', `<code>${incident.type}</code>`],
+    ['Gravedad', statusBadge(incident.severity)],
+    ['Resolución', resolutionBadge(incident)],
+    ['Traza ficticia', `<pre tabindex="0" aria-label="Traza ficticia del incidente ${incident.id}" class="max-h-40 overflow-auto rounded-lg bg-slate-200 p-3 font-mono text-xs leading-relaxed text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:bg-slate-800 dark:text-slate-200"><code>${escapeHtmlText(incident.stackTrace)}</code></pre>`],
+  ]);
+}
+
 function removeRecord(record, collection, element, emptyState) {
   const nextElement = element.nextElementSibling || element.previousElementSibling;
   collection.splice(collection.indexOf(record), 1);
@@ -439,6 +532,7 @@ usersRows.innerHTML = users.map(renderUserRow).join('');
 agentsList.innerHTML = agents.map(renderAgent).join('');
 skillsList.innerHTML = skills.map(renderSkill).join('');
 contractsRows.innerHTML = contracts.map(renderContractRow).join('');
+incidentsRows.innerHTML = incidents.map(renderIncidentRow).join('');
 
 for (const panel of document.querySelectorAll('[popover]')) {
   panel.addEventListener('beforetoggle', (event) => {
@@ -520,6 +614,24 @@ contractsRows.addEventListener('click', (event) => {
   const contract = contracts.find(({ id }) => id === row.dataset.contractId);
   closeActions(row.querySelector('[popovertarget]'));
   showContractDetails(contract);
+});
+
+incidentsRows.addEventListener('click', (event) => {
+  const action = event.target.closest('[data-action]');
+  if (!action || action.disabled) return;
+
+  const row = action.closest('[data-incident-id]');
+  const incident = incidents.find(({ id }) => id === row.dataset.incidentId);
+  closeActions(row.querySelector('[popovertarget]'));
+  if (action.dataset.action === 'detail') {
+    showIncidentDetails(incident);
+  } else if (action.dataset.action === 'resolve' && !incident.resolved) {
+    incident.resolved = true;
+    row.querySelector('[data-resolution]').innerHTML = resolutionBadge(incident);
+    action.disabled = true;
+    action.textContent = 'Ya resuelto';
+    incidentsFeedback.textContent = `El incidente ${incident.id} se marcó como resuelto.`;
+  }
 });
 
 actionDialog.addEventListener('click', (event) => {

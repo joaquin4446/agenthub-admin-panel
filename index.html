@@ -153,8 +153,27 @@
       </div>
     </section>
 
-    <section id="pending-section" aria-labelledby="section-title" hidden>
-      <p class="rounded-2xl border border-slate-200 bg-white p-6 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Esta sección estará disponible en una próxima fase.</p>
+    <section id="error" aria-labelledby="section-title" hidden>
+      <p id="incidents-feedback" role="status" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 empty:sr-only dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"></p>
+      <div class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <h2 id="incidents-table-title" class="px-5 py-4 font-semibold sm:px-6">Incidentes de ejecución</h2>
+        <div role="region" aria-labelledby="incidents-table-title" tabindex="0" class="overflow-x-auto rounded-b-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500">
+          <table aria-labelledby="incidents-table-title" class="w-full text-left text-sm">
+            <thead class="whitespace-nowrap border-y border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-medium">Fecha y hora</th>
+                <th scope="col" class="px-4 py-3 font-medium">Agente afectado</th>
+                <th scope="col" class="px-4 py-3 font-medium">Tipo de error</th>
+                <th scope="col" class="px-4 py-3 font-medium">Gravedad</th>
+                <th scope="col" class="px-4 py-3 font-medium">Descripción</th>
+                <th scope="col" class="px-4 py-3 font-medium">Resolución</th>
+                <th scope="col" class="px-4 py-3 text-right font-medium">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="incidents-rows" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
     </section>
   </main>
 
