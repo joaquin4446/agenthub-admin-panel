@@ -10,6 +10,7 @@ const sectionTitle = document.querySelector('#section-title');
 const sectionContext = document.querySelector('#section-context');
 const dashboard = document.querySelector('#dashboard');
 const usersSection = document.querySelector('#users');
+const agentsSection = document.querySelector('#bot');
 const pendingSection = document.querySelector('#pending-section');
 const themeToggle = document.querySelector('#theme-toggle');
 
@@ -46,13 +47,15 @@ for (const button of sectionButtons) {
     const title = button.querySelector('span').textContent;
     const showDashboard = button.dataset.section === 'dashboard';
     const showUsers = button.dataset.section === 'users';
+    const showAgents = button.dataset.section === 'bot';
+    closeActions();
     sectionTitle.textContent = title;
     sectionContext.textContent = button.dataset.context;
     document.title = `${title} | AgentHub`;
     dashboard.hidden = !showDashboard;
     usersSection.hidden = !showUsers;
-    pendingSection.hidden = showDashboard || showUsers;
-    closeUserActions();
+    agentsSection.hidden = !showAgents;
+    pendingSection.hidden = showDashboard || showUsers || showAgents;
 
     if (mobileMenu.open) mobileMenu.close();
     sectionTitle.focus();
@@ -72,29 +75,97 @@ const users = [
   { id: 'U005', name: 'Valeria Cruz', email: 'valeria@empresa.example', company: 'Cruz Operaciones', plan: 'Pro', status: 'Pendiente', registered: '20/11/2026', agents: [] },
 ];
 
+const agents = [
+  {
+    id: 'A001', name: 'Atlas', owner: 'Camila Torres', status: 'Activo',
+    skills: ['Navegación web', 'Lectura de documentos', 'Gestión de calendario'],
+    description: 'Asistente empresarial para investigación, documentos y organización de agendas.',
+    prompt: 'Eres Atlas, un asistente empresarial. Investiga fuentes públicas, resume documentos e identifica fechas y tareas para organizar la agenda del equipo.',
+  },
+  {
+    id: 'A002', name: 'Nova', owner: 'Mateo Ríos', status: 'Fallando',
+    skills: ['Navegación web', 'Análisis de datos'],
+    description: 'Agente especializado en investigación y análisis de información.',
+    prompt: 'Eres Nova, un asistente de investigación. Contrasta fuentes públicas, analiza tablas y presenta tus hallazgos con las métricas y limitaciones relevantes.',
+  },
+  {
+    id: 'A003', name: 'Iris', owner: 'Andrés Moreno', status: 'Activo',
+    skills: ['Lectura de documentos', 'Gestión de calendario'],
+    description: 'Asistente administrativo para documentos y planificación.',
+    prompt: 'Eres Iris, un asistente administrativo. Extrae acuerdos y plazos de los documentos y propone horarios para las tareas pendientes.',
+  },
+  {
+    id: 'A004', name: 'Echo', owner: 'Daniela Vega', status: 'Inactivo',
+    skills: ['Lectura de documentos'],
+    description: 'Agente de procesamiento y resumen de documentos.',
+    prompt: 'Eres Echo, un asistente documental. Resume cada documento, conserva sus cifras y fechas e indica las páginas de los hallazgos cuando estén disponibles.',
+  },
+];
+
 const statusColors = {
   Activo: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
   Suspendido: 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300',
   Pendiente: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300',
+  Fallando: 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300',
+  Inactivo: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
 };
 const usersRows = document.querySelector('#users-rows');
 const usersEmpty = document.querySelector('#users-empty');
 const usersFeedback = document.querySelector('#users-feedback');
-const userDialog = document.querySelector('#user-dialog');
-const dialogTitle = document.querySelector('#user-dialog-title');
-const dialogDescription = document.querySelector('#user-dialog-description');
+const agentsList = document.querySelector('#agents-list');
+const agentsEmpty = document.querySelector('#agents-empty');
+const agentsFeedback = document.querySelector('#agents-feedback');
+
+const actionDialog = document.querySelector('#action-dialog');
+const dialogTitle = document.querySelector('#action-dialog-title');
+const dialogDescription = document.querySelector('#action-dialog-description');
 const dialogDetails = document.querySelector('#user-dialog-details');
-const dialogDismiss = document.querySelector('#user-dialog-dismiss');
-const dialogConfirm = document.querySelector('#user-dialog-confirm');
-let openUserActions = null;
-let pendingDeletion = null;
+const dialogDismiss = document.querySelector('#action-dialog-dismiss');
+const dialogConfirm = document.querySelector('#action-dialog-confirm');
+const agentConfig = document.querySelector('#agent-dialog-config');
+const agentMeta = document.querySelector('#agent-dialog-meta');
+const agentPrompt = document.querySelector('#agent-prompt');
+let openActions = null;
+let confirmAction = null;
 
 function statusBadge(status) {
   return `<span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusColors[status]}">${status}</span>`;
 }
 
-function closeUserActions() {
-  openUserActions?.hidePopover();
+function closeActions() {
+  openActions?.hidePopover();
+}
+
+function renderActions({ id, name }, action, label) {
+  return `
+    <button type="button" aria-label="Acciones de ${name}" aria-expanded="false" aria-controls="actions-${id}" popovertarget="actions-${id}" class="size-10 rounded-lg text-xl leading-none text-slate-600 hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-slate-300 dark:hover:bg-slate-700">⋮</button>
+    <div id="actions-${id}" popover="auto" class="inset-auto bottom-4 right-4 m-0 w-44 rounded-xl border border-slate-200 bg-white p-1 text-left text-sm text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 supports-[position-area:bottom]:inset-auto supports-[position-area:bottom]:[position-area:bottom_span-left] supports-[position-area:bottom]:justify-self-end supports-[position-area:bottom]:[position-try-fallbacks:flip-block]">
+      <button type="button" data-action="${action}" autofocus class="block w-full rounded-lg px-3 py-2 text-left hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:hover:bg-slate-800">${label}</button>
+      <button type="button" data-action="delete" class="block w-full rounded-lg px-3 py-2 text-left text-rose-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-rose-300 dark:hover:bg-rose-500/15">Eliminar</button>
+    </div>`;
+}
+
+function showActionDialog({ title, description, content, confirmation, destructive = false, onConfirm }) {
+  dialogTitle.textContent = title;
+  dialogDescription.textContent = description;
+  dialogDetails.hidden = content !== dialogDetails;
+  agentConfig.hidden = content !== agentConfig;
+  dialogDismiss.textContent = confirmation ? 'Cancelar' : 'Cerrar';
+  dialogConfirm.hidden = !confirmation;
+  dialogConfirm.textContent = confirmation || '';
+  dialogConfirm.dataset.destructive = String(destructive);
+  confirmAction = onConfirm;
+  actionDialog.showModal();
+}
+
+function confirmDeletion(record, entity, onConfirm) {
+  showActionDialog({
+    title: `Eliminar ${entity}`,
+    description: `¿Quieres eliminar a ${record.name} de esta sesión de demostración?`,
+    confirmation: `Eliminar ${entity}`,
+    destructive: true,
+    onConfirm,
+  });
 }
 
 // Only the local demonstration fixtures are interpolated into these templates.
@@ -106,96 +177,171 @@ function renderUserRow(user) {
       <td class="px-5 py-3 text-slate-600 dark:text-slate-300 sm:px-6">${user.plan}</td>
       <td class="px-5 py-3 sm:px-6">${statusBadge(user.status)}</td>
       <td class="px-5 py-3 text-right sm:px-6">
-        <button type="button" aria-label="Acciones de ${user.name}" aria-expanded="false" aria-controls="actions-${user.id}" popovertarget="actions-${user.id}" class="size-10 rounded-lg text-xl leading-none text-slate-600 hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-slate-300 dark:hover:bg-slate-700">⋮</button>
-        <div id="actions-${user.id}" popover="auto" class="inset-auto bottom-4 right-4 m-0 w-44 rounded-xl border border-slate-200 bg-white p-1 text-left text-sm text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 supports-[position-area:bottom]:inset-auto supports-[position-area:bottom]:[position-area:bottom_span-left] supports-[position-area:bottom]:justify-self-end supports-[position-area:bottom]:[position-try-fallbacks:flip-block]">
-          <button type="button" data-user-action="detail" autofocus class="block w-full rounded-lg px-3 py-2 text-left hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:hover:bg-slate-800">Ver detalle</button>
-          <button type="button" data-user-action="delete" class="block w-full rounded-lg px-3 py-2 text-left text-rose-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-rose-300 dark:hover:bg-rose-500/15">Eliminar</button>
-        </div>
+        ${renderActions(user, 'detail', 'Ver detalle')}
       </td>
     </tr>`;
 }
 
-function showUserDialog(user, action) {
-  const isDeletion = action === 'delete';
-  pendingDeletion = isDeletion ? user : null;
-  dialogTitle.textContent = isDeletion ? 'Eliminar usuario' : 'Detalle de usuario';
-  dialogDescription.textContent = isDeletion
-    ? `¿Quieres eliminar a ${user.name} de esta sesión de demostración?`
-    : user.name;
-  dialogDismiss.textContent = isDeletion ? 'Cancelar' : 'Cerrar';
-  dialogConfirm.hidden = !isDeletion;
-  dialogDetails.hidden = isDeletion;
+function showUserDetails(user) {
+  const fields = [
+    ['ID', user.id],
+    ['Nombre', user.name],
+    ['Email', user.email],
+    ['Empresa', user.company],
+    ['Plan contratado', user.plan],
+    ['Estado', statusBadge(user.status)],
+    ['Fecha de registro', user.registered],
+    ['Agentes asignados', user.agents.join(', ') || 'Sin agentes asignados'],
+  ];
+  dialogDetails.innerHTML = fields.map(([label, value]) => `
+    <div>
+      <dt class="text-xs font-medium text-slate-600 dark:text-slate-400">${label}</dt>
+      <dd class="mt-1 break-words font-medium">${value}</dd>
+    </div>`).join('');
+  showActionDialog({ title: 'Detalle de usuario', description: user.name, content: dialogDetails });
+}
 
-  if (!isDeletion) {
-    const fields = [
-      ['ID', user.id],
-      ['Nombre', user.name],
-      ['Email', user.email],
-      ['Empresa', user.company],
-      ['Plan contratado', user.plan],
-      ['Estado', statusBadge(user.status)],
-      ['Fecha de registro', user.registered],
-      ['Agentes asignados', user.agents.join(', ') || 'Sin agentes asignados'],
-    ];
-    dialogDetails.innerHTML = fields.map(([label, value]) => `
-      <div>
-        <dt class="text-xs font-medium text-slate-600 dark:text-slate-400">${label}</dt>
-        <dd class="mt-1 break-words font-medium">${value}</dd>
-      </div>`).join('');
+function renderAgent(agent) {
+  const skillsId = `agent-skills-${agent.id}`;
+  return `
+    <li data-agent-id="${agent.id}">
+      <article aria-labelledby="agent-name-${agent.id}" class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <div class="flex items-start gap-3 sm:gap-4">
+          <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
+            <svg aria-hidden="true" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8 M4 8h16v12H4z M1 13h3 M20 13h3 M9 13h.01 M15 13h.01"/></svg>
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h2 id="agent-name-${agent.id}" class="text-lg font-semibold tracking-tight">${agent.name}</h2>
+              <span class="font-mono text-xs text-slate-500 dark:text-slate-400">${agent.id}</span>
+              ${statusBadge(agent.status)}
+            </div>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Propietario: ${agent.owner}</p>
+          </div>
+          <div class="shrink-0">${renderActions(agent, 'configure', 'Configurar')}</div>
+        </div>
+        <p class="mt-4 text-sm text-slate-600 dark:text-slate-300 sm:pl-14">${agent.description}</p>
+        <div class="mt-3 sm:pl-14">
+          <button type="button" data-skills-toggle aria-controls="${skillsId}" aria-expanded="false" class="group inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500 dark:text-violet-300 dark:hover:bg-violet-500/15">
+            <span>Ver skills</span><span class="sr-only"> de ${agent.name}</span>
+            <svg aria-hidden="true" class="size-4 motion-safe:transition-transform motion-safe:duration-300 group-aria-expanded:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div id="${skillsId}" inert data-expanded="false" class="grid grid-rows-[0fr] opacity-0 data-[expanded=true]:grid-rows-[1fr] data-[expanded=true]:opacity-100 motion-safe:transition-[grid-template-rows,opacity] motion-safe:duration-300 motion-safe:ease-in-out">
+            <div class="min-h-0 overflow-hidden">
+              <ul role="list" class="flex flex-wrap gap-2 pt-2">
+                ${agent.skills.map(skill => `<li class="rounded-lg bg-slate-100 px-3 py-1.5 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-200">${skill}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </article>
+    </li>`;
+}
+
+function configureAgent(agent) {
+  agentMeta.innerHTML = `<span class="font-mono text-slate-600 dark:text-slate-300">${agent.id}</span>${statusBadge(agent.status)}`;
+  agentPrompt.value = agent.prompt;
+  showActionDialog({
+    title: `Configurar ${agent.name}`,
+    description: 'Edita las instrucciones del agente para esta sesión.',
+    content: agentConfig,
+    confirmation: 'Guardar cambios',
+    onConfirm: () => {
+      agent.prompt = agentPrompt.value;
+      agentsFeedback.textContent = `Se guardó el prompt de ${agent.name} para esta sesión.`;
+    },
+  });
+  agentPrompt.focus();
+}
+
+function removeRecord(record, collection, element, emptyState) {
+  const nextElement = element.nextElementSibling || element.previousElementSibling;
+  collection.splice(collection.indexOf(record), 1);
+  element.remove();
+
+  if (nextElement) {
+    nextElement.querySelector('[popovertarget]').focus();
+  } else {
+    emptyState.hidden = false;
+    emptyState.focus();
   }
-
-  userDialog.showModal();
 }
 
 usersRows.innerHTML = users.map(renderUserRow).join('');
+agentsList.innerHTML = agents.map(renderAgent).join('');
 
-for (const panel of usersRows.querySelectorAll('[popover]')) {
+for (const panel of document.querySelectorAll('[popover]')) {
   panel.addEventListener('beforetoggle', (event) => {
     const expanded = event.newState === 'open';
     panel.previousElementSibling.setAttribute('aria-expanded', String(expanded));
-    if (expanded) openUserActions = panel;
-    else if (openUserActions === panel) openUserActions = null;
+    if (expanded) openActions = panel;
+    else if (openActions === panel) openActions = null;
   });
 }
 
 usersRows.addEventListener('click', (event) => {
-  const action = event.target.closest('[data-user-action]');
+  const action = event.target.closest('[data-action]');
   if (!action) return;
 
   const row = action.closest('[data-user-id]');
   const user = users.find(({ id }) => id === row.dataset.userId);
-  closeUserActions();
+  closeActions();
   row.querySelector('[popovertarget]').focus();
-  showUserDialog(user, action.dataset.userAction);
+  if (action.dataset.action === 'detail') {
+    showUserDetails(user);
+  } else {
+    confirmDeletion(user, 'usuario', () => {
+      removeRecord(user, users, row, usersEmpty);
+      if (!users.length) document.querySelector('#users-table').parentElement.hidden = true;
+      usersFeedback.textContent = `${user.name} se eliminó de esta sesión.`;
+    });
+  }
 });
 
-userDialog.addEventListener('click', (event) => {
-  if (event.target !== userDialog) return;
-  const bounds = userDialog.getBoundingClientRect();
+agentsList.addEventListener('click', (event) => {
+  const toggle = event.target.closest('[data-skills-toggle]');
+  if (toggle) {
+    const expanded = toggle.getAttribute('aria-expanded') === 'false';
+    const panel = document.getElementById(toggle.getAttribute('aria-controls'));
+    toggle.setAttribute('aria-expanded', String(expanded));
+    toggle.querySelector('span').textContent = expanded ? 'Ocultar skills' : 'Ver skills';
+    panel.dataset.expanded = String(expanded);
+    panel.inert = !expanded;
+    return;
+  }
+
+  const action = event.target.closest('[data-action]');
+  if (!action) return;
+
+  const card = action.closest('[data-agent-id]');
+  const agent = agents.find(({ id }) => id === card.dataset.agentId);
+  closeActions();
+  card.querySelector('[popovertarget]').focus();
+  if (action.dataset.action === 'configure') {
+    configureAgent(agent);
+  } else {
+    confirmDeletion(agent, 'agente', () => {
+      removeRecord(agent, agents, card, agentsEmpty);
+      agentsFeedback.textContent = `${agent.name} se eliminó del inventario de esta sesión.`;
+    });
+  }
+});
+
+actionDialog.addEventListener('click', (event) => {
+  if (event.target !== actionDialog) return;
+  const bounds = actionDialog.getBoundingClientRect();
   if (event.clientX < bounds.left || event.clientX >= bounds.right ||
       event.clientY < bounds.top || event.clientY >= bounds.bottom) {
-    userDialog.close();
+    actionDialog.close();
   }
 });
 
-userDialog.querySelector('form').addEventListener('submit', (event) => {
-  if (event.submitter !== dialogConfirm || !pendingDeletion) return;
+actionDialog.querySelector('form').addEventListener('submit', (event) => {
+  if (event.submitter !== dialogConfirm || !actionDialog.open || !confirmAction) return;
   event.preventDefault();
 
-  const user = pendingDeletion;
-  pendingDeletion = null;
-  const row = usersRows.querySelector(`[data-user-id="${user.id}"]`);
-  const nextRow = row.nextElementSibling || row.previousElementSibling;
-  userDialog.close();
-  users.splice(users.indexOf(user), 1);
-  row.remove();
-  usersFeedback.textContent = `${user.name} se eliminó de esta sesión.`;
-
-  if (nextRow) {
-    nextRow.querySelector('[popovertarget]').focus();
-  } else {
-    document.querySelector('#users-table').parentElement.hidden = true;
-    usersEmpty.hidden = false;
-    usersEmpty.focus();
-  }
+  const applyChange = confirmAction;
+  confirmAction = null;
+  actionDialog.close();
+  applyChange();
 });
