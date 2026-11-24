@@ -11,6 +11,7 @@ const sectionContext = document.querySelector('#section-context');
 const dashboard = document.querySelector('#dashboard');
 const usersSection = document.querySelector('#users');
 const agentsSection = document.querySelector('#bot');
+const skillsSection = document.querySelector('#skills');
 const pendingSection = document.querySelector('#pending-section');
 const themeToggle = document.querySelector('#theme-toggle');
 
@@ -48,6 +49,7 @@ for (const button of sectionButtons) {
     const showDashboard = button.dataset.section === 'dashboard';
     const showUsers = button.dataset.section === 'users';
     const showAgents = button.dataset.section === 'bot';
+    const showSkills = button.dataset.section === 'skills';
     closeActions();
     sectionTitle.textContent = title;
     sectionContext.textContent = button.dataset.context;
@@ -55,7 +57,8 @@ for (const button of sectionButtons) {
     dashboard.hidden = !showDashboard;
     usersSection.hidden = !showUsers;
     agentsSection.hidden = !showAgents;
-    pendingSection.hidden = showDashboard || showUsers || showAgents;
+    skillsSection.hidden = !showSkills;
+    pendingSection.hidden = showDashboard || showUsers || showAgents || showSkills;
 
     if (mobileMenu.open) mobileMenu.close();
     sectionTitle.focus();
@@ -102,6 +105,41 @@ const agents = [
   },
 ];
 
+const skills = [
+  {
+    id: 'S001', name: 'Navegación web', category: 'Investigación y navegación',
+    description: 'Consulta páginas y recopila información pública.',
+    details: 'Localiza información en sitios públicos, compara lo que dicen distintas fuentes y conserva los enlaces para poder revisar los hallazgos.',
+    examples: ['Comparar los requisitos publicados para dos becas ficticias.', 'Recopilar fechas y enlaces de eventos publicados por un centro cultural ficticio.'],
+    icon: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18 M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18Z"/>',
+  },
+  {
+    id: 'S002', name: 'Lectura de documentos', category: 'Procesamiento documental',
+    description: 'Extrae y resume información de archivos.',
+    details: 'Identifica secciones relevantes en documentos, extrae datos como fechas y acuerdos, y prepara resúmenes para facilitar su revisión.',
+    examples: ['Resumir el acta ficticia de una reunión de proyecto.', 'Extraer plazos y responsables de un manual de incorporación de ejemplo.'],
+    icon: '<path d="M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7"/>',
+  },
+  {
+    id: 'S003', name: 'Gestión de calendario', category: 'Productividad y organización',
+    description: 'Consulta y organiza agendas.',
+    details: 'Revisa disponibilidades, identifica conflictos entre citas y propone horarios compatibles con la agenda y las prioridades del equipo.',
+    examples: ['Proponer horarios para una reunión ficticia entre tres departamentos.', 'Detectar solapamientos en la agenda de un taller de ejemplo.'],
+    icon: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4 M16 3v4 M3 10h18 M8 14h2 M14 14h2 M8 17h2"/>',
+  },
+  {
+    id: 'S004', name: 'Análisis de datos', category: 'Analítica',
+    description: 'Interpreta tablas y métricas.',
+    details: 'Resume datos tabulares mediante métricas comparables, detecta variaciones y explica los resultados teniendo en cuenta la calidad de los datos.',
+    examples: ['Comparar ventas mensuales de una tienda de demostración.', 'Detectar valores atípicos en una tabla ficticia de tiempos de entrega.'],
+    icon: '<path d="M3 3v18h18 M8 16v-3 M13 16V9 M18 16V6"/>',
+  },
+].map(skill => ({
+  ...skill,
+  // Capture the original demo assignments before either inventory can be edited.
+  agentNames: agents.filter(agent => agent.skills.includes(skill.name)).map(agent => agent.name),
+}));
+
 const statusColors = {
   Activo: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
   Suspendido: 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300',
@@ -115,11 +153,14 @@ const usersFeedback = document.querySelector('#users-feedback');
 const agentsList = document.querySelector('#agents-list');
 const agentsEmpty = document.querySelector('#agents-empty');
 const agentsFeedback = document.querySelector('#agents-feedback');
+const skillsList = document.querySelector('#skills-list');
+const skillsEmpty = document.querySelector('#skills-empty');
+const skillsFeedback = document.querySelector('#skills-feedback');
 
 const actionDialog = document.querySelector('#action-dialog');
 const dialogTitle = document.querySelector('#action-dialog-title');
 const dialogDescription = document.querySelector('#action-dialog-description');
-const dialogDetails = document.querySelector('#user-dialog-details');
+const dialogDetails = document.querySelector('#action-dialog-details');
 const dialogDismiss = document.querySelector('#action-dialog-dismiss');
 const dialogConfirm = document.querySelector('#action-dialog-confirm');
 const agentConfig = document.querySelector('#agent-dialog-config');
@@ -161,7 +202,7 @@ function showActionDialog({ title, description, content, confirmation, destructi
 function confirmDeletion(record, entity, onConfirm) {
   showActionDialog({
     title: `Eliminar ${entity}`,
-    description: `¿Quieres eliminar a ${record.name} de esta sesión de demostración?`,
+    description: `¿Quieres eliminar ${entity === 'skill' ? 'la skill' : 'a'} ${record.name} de esta sesión de demostración?`,
     confirmation: `Eliminar ${entity}`,
     destructive: true,
     onConfirm,
@@ -182,8 +223,17 @@ function renderUserRow(user) {
     </tr>`;
 }
 
+function showDetails(title, description, fields) {
+  dialogDetails.innerHTML = fields.map(([label, value]) => `
+    <div class="sm:last:odd:col-span-2">
+      <dt class="text-xs font-medium text-slate-600 dark:text-slate-400">${label}</dt>
+      <dd class="mt-1 break-words font-medium">${value}</dd>
+    </div>`).join('');
+  showActionDialog({ title, description, content: dialogDetails });
+}
+
 function showUserDetails(user) {
-  const fields = [
+  showDetails('Detalle de usuario', user.name, [
     ['ID', user.id],
     ['Nombre', user.name],
     ['Email', user.email],
@@ -192,13 +242,7 @@ function showUserDetails(user) {
     ['Estado', statusBadge(user.status)],
     ['Fecha de registro', user.registered],
     ['Agentes asignados', user.agents.join(', ') || 'Sin agentes asignados'],
-  ];
-  dialogDetails.innerHTML = fields.map(([label, value]) => `
-    <div>
-      <dt class="text-xs font-medium text-slate-600 dark:text-slate-400">${label}</dt>
-      <dd class="mt-1 break-words font-medium">${value}</dd>
-    </div>`).join('');
-  showActionDialog({ title: 'Detalle de usuario', description: user.name, content: dialogDetails });
+  ]);
 }
 
 function renderAgent(agent) {
@@ -254,6 +298,40 @@ function configureAgent(agent) {
   agentPrompt.focus();
 }
 
+function renderSkill(skill) {
+  const count = skill.agentNames.length;
+  return `
+    <li data-skill-id="${skill.id}">
+      <article aria-labelledby="skill-name-${skill.id}" class="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <div class="flex items-start gap-3 sm:gap-4">
+          <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
+            <svg aria-hidden="true" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">${skill.icon}</svg>
+          </span>
+          <div class="min-w-0 flex-1">
+            <h2 id="skill-name-${skill.id}" class="text-lg font-semibold tracking-tight">${skill.name}</h2>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">${skill.category}</p>
+          </div>
+          <div class="shrink-0">${renderActions(skill, 'detail', 'Ver detalle')}</div>
+        </div>
+        <p class="mt-4 flex-1 text-sm text-slate-600 dark:text-slate-300">${skill.description}</p>
+        <p class="mt-4">
+          <span class="inline-flex rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 dark:bg-violet-500/15 dark:text-violet-200">${count} ${count === 1 ? 'agente' : 'agentes'}</span>
+        </p>
+      </article>
+    </li>`;
+}
+
+function showSkillDetails(skill) {
+  const examples = skill.examples.map(example => `<li>${example}</li>`).join('');
+  showDetails(skill.name, skill.details, [
+    ['ID', skill.id],
+    ['Categoría', skill.category],
+    ['Cantidad de agentes', skill.agentNames.length],
+    ['Agentes que la utilizan', skill.agentNames.join(', ')],
+    ['Ejemplos de uso', `<ul class="list-disc space-y-1 pl-5">${examples}</ul>`],
+  ]);
+}
+
 function removeRecord(record, collection, element, emptyState) {
   const nextElement = element.nextElementSibling || element.previousElementSibling;
   collection.splice(collection.indexOf(record), 1);
@@ -269,6 +347,7 @@ function removeRecord(record, collection, element, emptyState) {
 
 usersRows.innerHTML = users.map(renderUserRow).join('');
 agentsList.innerHTML = agents.map(renderAgent).join('');
+skillsList.innerHTML = skills.map(renderSkill).join('');
 
 for (const panel of document.querySelectorAll('[popover]')) {
   panel.addEventListener('beforetoggle', (event) => {
@@ -323,6 +402,24 @@ agentsList.addEventListener('click', (event) => {
     confirmDeletion(agent, 'agente', () => {
       removeRecord(agent, agents, card, agentsEmpty);
       agentsFeedback.textContent = `${agent.name} se eliminó del inventario de esta sesión.`;
+    });
+  }
+});
+
+skillsList.addEventListener('click', (event) => {
+  const action = event.target.closest('[data-action]');
+  if (!action) return;
+
+  const card = action.closest('[data-skill-id]');
+  const skill = skills.find(({ id }) => id === card.dataset.skillId);
+  closeActions();
+  card.querySelector('[popovertarget]').focus();
+  if (action.dataset.action === 'detail') {
+    showSkillDetails(skill);
+  } else {
+    confirmDeletion(skill, 'skill', () => {
+      removeRecord(skill, skills, card, skillsEmpty);
+      skillsFeedback.textContent = `Se eliminó ${skill.name} del catálogo de esta sesión.`;
     });
   }
 });

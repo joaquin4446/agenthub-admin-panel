@@ -119,6 +119,16 @@
       <p id="agents-empty" tabindex="-1" class="rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300" hidden>No quedan agentes en el inventario.</p>
     </section>
 
+    <section id="skills" aria-labelledby="section-title" hidden>
+      <div class="mb-5 flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <div class="grid size-11 shrink-0 place-items-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"><svg aria-hidden="true" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5 M12 8h.01"/></svg></div>
+        <p class="self-center text-sm leading-relaxed text-slate-700 dark:text-slate-300">Una skill es una capacidad adicional que puede habilitarse en un agente, como navegar por la web, analizar datos, leer documentos o gestionar calendarios.</p>
+      </div>
+      <p id="skills-feedback" role="status" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 empty:sr-only dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"></p>
+      <ul id="skills-list" role="list" class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5"></ul>
+      <p id="skills-empty" tabindex="-1" class="rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300" hidden>No quedan skills en el catálogo.</p>
+    </section>
+
     <section id="pending-section" aria-labelledby="section-title" hidden>
       <p class="rounded-2xl border border-slate-200 bg-white p-6 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Esta sección estará disponible en una próxima fase.</p>
     </section>
@@ -128,7 +138,7 @@
     <div class="p-5 sm:p-6">
       <h2 id="action-dialog-title" class="text-xl font-semibold tracking-tight"></h2>
       <p id="action-dialog-description" class="mt-2 text-sm text-slate-600 dark:text-slate-300"></p>
-      <dl id="user-dialog-details" class="mt-5 gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-950/50 sm:grid-cols-2 [&:not([hidden])]:grid" hidden></dl>
+      <dl id="action-dialog-details" class="mt-5 gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-950/50 sm:grid-cols-2 [&:not([hidden])]:grid" hidden></dl>
       <form method="dialog">
         <div id="agent-dialog-config" class="mt-5 space-y-4" hidden>
           <div id="agent-dialog-meta" class="flex flex-wrap items-center gap-3 text-sm"></div>
